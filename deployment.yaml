@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: service
+  name: nodejs-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: service
+        app: nodejs-app
+    spec:
+      containers:
+        - name: nodejs-app
+          image: multi-stage-react-app-example:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
