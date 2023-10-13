@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/yashpareek11/nodejsapp.git']])
+            }
+        }
+        stage('docker build image') {
+            steps {
+                sh 'docker build -t yashpareek99/nodejsapp .'
+            }
+        }
+        stage('push image on dockerhub') {
+            steps {
+                withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+                    sh 'docker login -u yashpareek99 -p ${dockerhubpwd}'
+                    sh 'docker push yashpareek99/nodejsapp'
+                }
+            }
+        }
+        stage('Pull Image on EC2') {
+            steps {
+	          sshagent(['3.27.12.222']) {
+			    sh 'ssh -o StrictHostKeyChecking=no -l root 3.27.12.222 docker pull yashpareek99/nodejsapp:latest'
+	          }     
+            }
+        }
+        stage('deploy application on docker container') {
+            steps {
+	          sshagent(['3.27.12.222']) {
+                sh 'ssh -o StrictHostKeyChecking=no -l root 3.27.12.222 docker run -d -p 3000:3000 yashpareek99/nodejsapp'
+	          }     
+            }
+        }
+    }
+}
