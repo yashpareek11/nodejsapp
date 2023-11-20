@@ -11,6 +11,9 @@ jobs:
   build:
 
     runs-on: self-hosted
+    
+    environment: 'dev'
+    if: ${{ success() }}
 
     strategy:
       matrix:
